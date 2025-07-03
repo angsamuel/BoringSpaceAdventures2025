@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1427639402359611762}
   - component: {fileID: 5828947896430483827}
   - component: {fileID: 6967009983872979644}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: SlateCube
   m_TagString: Untagged
   m_Icon: {fileID: 0}

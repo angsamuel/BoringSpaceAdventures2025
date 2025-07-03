@@ -34,6 +34,10 @@ public abstract class Item : MonoBehaviour
 
 
     public abstract void SubUseItem();
+
+    public virtual bool NeedsReload(){
+        return false;
+    }
     public virtual void Reload(){
 
     }

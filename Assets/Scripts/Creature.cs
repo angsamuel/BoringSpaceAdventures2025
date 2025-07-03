@@ -49,6 +49,7 @@ public class Creature : MonoBehaviour
     void Start()
     {
         oxygen = maxOxygen;
+        AIResourceManager.singleton.RegisterCreature(this);
         //transform.position = transform.position + new Vector3(10, 0, 0);
     }
 

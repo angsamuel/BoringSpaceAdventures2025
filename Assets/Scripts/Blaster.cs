@@ -16,6 +16,8 @@ public class Blaster : Item
     public Transform projectileSpawnPoint;
     public GameObject projectilePrefab;
 
+    public Transform aimTransform; //use this to choose final projectile position.
+
     void Start(){
         magazinesLeft = maxMagazines;
     }
@@ -36,5 +38,12 @@ public class Blaster : Item
         }
         currentUses = maxUses;
         magazinesLeft -= 1;
+    }
+
+    public override bool NeedsReload(){
+        if(currentUses < 1){
+            return true;
+        }
+        return false;
     }
 }

@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 public class GruntAI : MonoBehaviour
 {
     [Header("Debug")]
@@ -9,17 +10,30 @@ public class GruntAI : MonoBehaviour
     public float maxWanderDistance = 5;
     public float minApproachDistance = .25f;
     public float sightDistance = 10f;
+    public LayerMask sightMask;
 
     [Header("References")]
-    public Transform targetTransform;
+    public Creature targetCreature;
     Creature myCreature;
     IEnumerator currentState;
+    OxygenRefillStation oxyStation;
+
+    //Trackers
+    Vector3 lastTargetPos = Vector3.zero;
+
+
+
 
     void Awake(){
         myCreature = GetComponent<Creature>();
+
+        returnPosition = transform.position;
+
+        //oxyStation = GameObject.FindGameObjectWithTag("OxygenRefillStation").GetComponent<OxygenRefillStation>();
     }
     void Start(){
         ChangeState(WanderState());
+
     }
     void ChangeState(IEnumerator newState){
 
@@ -29,25 +43,54 @@ public class GruntAI : MonoBehaviour
         StartCoroutine(newState);
     }
 
-    public bool HasTarget(){
-        return Vector3.Distance(transform.position, targetTransform.position) < sightDistance;
+    public bool CanSeeTarget(){
+        if(targetCreature == null){
+            return false;
+        }
+
+        if(!CanSee(transform.position, targetCreature.transform.position)){
+            targetCreature = null;
+            return false;
+        }
+
+        return true;
     }
 
     IEnumerator PursuitState(){
         Debug.Log("PursuitState");
         debugState = "PursuitState";
 
-        while(Vector3.Distance(transform.position, targetTransform.position) <= sightDistance)
+        while(Vector3.Distance(transform.position, lastTargetPos) > minApproachDistance)
         {
             yield return null;
-            if(Vector3.Distance(transform.position, targetTransform.position) > minApproachDistance){
-                myCreature.MoveToward(targetTransform.position);
+
+            if (NeedOxygenRefill())
+            {
+                ChangeState(RefillOxygen());
+                yield break;
             }
+
+            if (AttemptCombatState())
+            {
+                yield break;
+            }
+
+            myCreature.MoveToward(lastTargetPos);
+
         }
 
-        ChangeState(WanderState());
+        ChangeState(ReturnState());
         yield break;
 
+    }
+
+    bool AttemptCombatState(){
+        ChooseTarget();
+        if(CanSeeTarget()){
+            ChangeState(BlastState());
+            return true;
+        }
+        return false;
     }
 
     IEnumerator WanderState(){
@@ -57,6 +100,7 @@ public class GruntAI : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         Vector3 startPos = transform.position;
+        returnPosition = transform.position;
 
         while(true){
             Vector3 wanderPositon = startPos + new Vector3(Random.Range(-maxWanderDistance, maxWanderDistance),0,Random.Range(-maxWanderDistance, maxWanderDistance));
@@ -66,18 +110,113 @@ public class GruntAI : MonoBehaviour
                 timer += Time.deltaTime;
                 myCreature.MoveToward(wanderPositon);
                 yield return null;
-                if(HasTarget()){
-                    ChangeState(PursuitState());
+                if(AttemptCombatState()){
                     yield break;
                 }
             }
 
+            //yield return new WaitForSeconds(1f);
 
-            yield return new WaitForSeconds(1f);
+             timer = 0;
+            while(timer < 1){
+                yield return null;
+                timer+=Time.deltaTime;
+                if (AttemptCombatState())
+                {
+                    yield break;
+                }
+            }
+
+            if(NeedOxygenRefill()){
+                ChangeState(RefillOxygen());
+                yield break;
+            }
 
             //creature stops
         }
 
         yield return null;
+    }
+
+    bool NeedOxygenRefill(){
+        if(myCreature.oxygen <= myCreature.maxOxygen / 2){
+            return true;
+        }
+        return false;
+    }
+
+    IEnumerator RefillOxygen(){
+        debugState = "RefillOxygen";
+        OxygenRefillStation targetOxyStation = AIResourceManager.singleton.GetNearestOxygenRefillStation(transform.position);
+
+        if(targetOxyStation == null){
+            ChangeState(WanderState());
+            yield break;
+        }
+
+        while(true){
+            myCreature.MoveToward(targetOxyStation.transform.position);
+            if (Vector3.Distance(transform.position, targetOxyStation.transform.position) < minApproachDistance)
+            {
+                ChangeState(ReturnState());
+                yield break;
+            }
+            yield return null;
+        }
+        yield return null;
+    }
+
+    Vector3 returnPosition;
+    IEnumerator ReturnState(){
+        while(true){
+            yield return null;
+            if (AttemptCombatState())
+            {
+                yield break;
+            }
+            if (Vector3.Distance(transform.position, returnPosition) < minApproachDistance){
+                ChangeState(WanderState());
+                yield break;
+            }
+            myCreature.MoveToward(returnPosition);
+        }
+        yield return null;
+    }
+
+
+    void ChooseTarget(){
+        debugState = "ChooseTargetState";
+        List<Creature> creaturesInRange = AIResourceManager.singleton.GetCreaturesInRange(myCreature, transform.position, sightDistance);
+        for(int i  = 0; i<creaturesInRange.Count; i++){
+            if(CanSee(transform.position,creaturesInRange[i].transform.position)){
+                targetCreature = creaturesInRange[i];
+                Debug.Log(targetCreature.gameObject.name);
+                return;
+            }
+        }
+    }
+
+    bool CanSee(Vector3 start, Vector3 destination){
+        if(Vector3.Distance(start,destination) > sightDistance){
+            return false;
+        }
+       if(!Physics.Linecast(start,destination,sightMask)){
+         lastTargetPos = destination;
+         return true;
+       }
+       return false;
+    }
+
+    IEnumerator BlastState(){
+
+        while(CanSeeTarget()){
+            myCreature.AimItemToward(targetCreature.transform.position);
+            myCreature.UseItem();
+            yield return null;
+        }
+        yield return null;
+
+        ChangeState(PursuitState());
+        yield break;
     }
 }

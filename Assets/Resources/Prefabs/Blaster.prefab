@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8394017864691038082}
   - component: {fileID: 1666898999199035069}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Blaster
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -49,10 +49,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentUses: 100
   maxUses: 100
+  maxCooldown: 1
   projectileSpeed: 20
   projectileDamage: 1
+  maxMagazines: 10
   projectileSpawnPoint: {fileID: 1281084427984734702}
   projectilePrefab: {fileID: 3270634916562601225, guid: 0edd4efb8b21af142934b439f2d3e5e8, type: 3}
+  aimTransform: {fileID: 0}
 --- !u!1 &5438019132574323810
 GameObject:
   m_ObjectHideFlags: 0
@@ -62,7 +65,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1281084427984734702}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: ProjectileSpawnPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -95,7 +98,7 @@ GameObject:
   - component: {fileID: 7085134021257620408}
   - component: {fileID: 989457779531321434}
   - component: {fileID: 6089547867759812358}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Handle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -181,7 +184,7 @@ GameObject:
   - component: {fileID: 3638098605034589203}
   - component: {fileID: 3936730611608233682}
   - component: {fileID: 7749570952804062734}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Barrel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
