@@ -1,0 +1,4 @@
+repository "BoringSpaceAdventures@AstralSquid@cloud"
+  path "/"
+    br "/main"
+    co "/main"
