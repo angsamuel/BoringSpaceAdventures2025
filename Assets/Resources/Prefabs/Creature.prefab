@@ -249,7 +249,7 @@ GameObject:
   - component: {fileID: 4145942569325594962}
   m_Layer: 0
   m_Name: Creature
-  m_TagString: Player
+  m_TagString: Creature
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -287,8 +287,8 @@ MonoBehaviour:
   damageMultiplier: 0.5
   speed: 15
   jumpForce: 10
-  health: 100
-  maxHealth: 100
+  health: 4
+  maxHealth: 4
   oxygenRefillChance: 0.5
   maxOxygen: 100
   oxygen: 100

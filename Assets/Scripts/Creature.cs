@@ -35,6 +35,9 @@ public class Creature : MonoBehaviour
     public List<Item> inventory;
     int currentIndex = 0;
 
+    [Header("Special")]
+    public bool isPlayer = false;
+
 
 
 
@@ -88,11 +91,15 @@ public class Creature : MonoBehaviour
     public void Move(Vector3 direction){
 
         direction.y = 0;
-        direction = direction.normalized;
 
-        if(direction == Vector3.zero){
+
+
+        if (direction == Vector3.zero) //fixed
+        { //this was the problem
             return;
         }
+
+        direction = direction.normalized;
         //consume a little bit of oxygen
         //transform.position = transform.position + direction * speed * Time.deltaTime;
         cc.Move(direction * speed * Time.deltaTime);
@@ -223,6 +230,10 @@ public class Creature : MonoBehaviour
     }
     public void PreviousInventoryItem(){
         SelectInventoryItem(currentIndex - 1);
+    }
+
+    public float GetPerFrameDistance(){
+        return speed * Time.deltaTime;
     }
 
 

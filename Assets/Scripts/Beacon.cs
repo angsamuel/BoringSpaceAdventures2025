@@ -37,8 +37,13 @@ public class Beacon : MonoBehaviour
     }
 
     void OnTriggerEnter(Collider other){
-        if(other.gameObject.tag == "Player"){
+        if(!other.gameObject.CompareTag("Creature")){
+            return;
+        }
+        if (other.GetComponent<Creature>().isPlayer)
+        {
             TurnOn();
         }
+
     }
 }

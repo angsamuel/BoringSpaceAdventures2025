@@ -20,8 +20,12 @@ public class LanderCreatureSpot : MonoBehaviour
         if(!beacon.IsOn()){
             return;
         }
-        if(other.CompareTag("Player")){
+        if(!other.CompareTag("Creature")){
+            return;
+        }
+        if (other.GetComponent<Creature>().isPlayer){
             lander.TakeOff();
         }
+
     }
 }

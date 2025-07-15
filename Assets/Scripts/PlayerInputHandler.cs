@@ -57,7 +57,7 @@ public class PlayerInputHandler : MonoBehaviour
             playerCreature.Jump();
         }
 
-        if(Input.GetKeyDown(KeyCode.Mouse0)){
+        if(Input.GetKey(KeyCode.Mouse0)){
             playerCreature.UseItem();
         }
 

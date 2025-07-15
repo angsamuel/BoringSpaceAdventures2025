@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.AI;
 public class GruntAI : MonoBehaviour
 {
     [Header("Debug")]
@@ -20,6 +21,8 @@ public class GruntAI : MonoBehaviour
 
     //Trackers
     Vector3 lastTargetPos = Vector3.zero;
+
+
 
 
 
@@ -55,34 +58,75 @@ public class GruntAI : MonoBehaviour
 
         return true;
     }
-
     IEnumerator PursuitState(){
-        Debug.Log("PursuitState");
         debugState = "PursuitState";
 
-        while(Vector3.Distance(transform.position, lastTargetPos) > minApproachDistance)
+        yield return new WaitForSeconds(1f);
+
+        NavMeshPath path = new NavMeshPath();
+        int nextElement = 1;
+        bool pathFound = GetComponent<NavMeshAgent>().CalculatePath(lastTargetPos, path);
+        //GetComponent<NavMeshAgent>().enabled = false;
+        if (!pathFound)
         {
-            yield return null;
+            Debug.Log("No path found");
+            ChangeState(WanderState());
+            yield break;
+        }
 
-            if (NeedOxygenRefill())
-            {
-                ChangeState(RefillOxygen());
-                yield break;
-            }
+        Debug.Log("Path found");
 
+        while (nextElement < path.corners.Length)
+        {
+            myCreature.MoveToward(path.corners[nextElement]);
             if (AttemptCombatState())
             {
                 yield break;
             }
 
-            myCreature.MoveToward(lastTargetPos);
+            float threshold = Mathf.Max(myCreature.GetPerFrameDistance(), minApproachDistance);
+
+            if (Vector3.Distance(transform.position, path.corners[nextElement]) <= threshold)
+            {
+                nextElement++;
+            }
+            yield return null;
 
         }
 
-        ChangeState(ReturnState());
-        yield break;
+        yield return null;
+        if(AttemptCombatState()){
+            yield break;
+        }
+        ChangeState(WanderState());
+     }
+    // IEnumerator PursuitStateLegacy(){
+    //     Debug.Log("PursuitState");
+    //     debugState = "PursuitState";
 
-    }
+    //     while(Vector3.Distance(transform.position, lastTargetPos) > minApproachDistance)
+    //     {
+    //         yield return null;
+
+    //         if (NeedOxygenRefill())
+    //         {
+    //             ChangeState(RefillOxygen());
+    //             yield break;
+    //         }
+
+    //         if (AttemptCombatState())
+    //         {
+    //             yield break;
+    //         }
+
+    //         myCreature.MoveToward(lastTargetPos);
+
+    //     }
+
+    //     ChangeState(ReturnState());
+    //     yield break;
+
+    // }
 
     bool AttemptCombatState(){
         ChooseTarget();
@@ -185,7 +229,6 @@ public class GruntAI : MonoBehaviour
 
 
     void ChooseTarget(){
-        debugState = "ChooseTargetState";
         List<Creature> creaturesInRange = AIResourceManager.singleton.GetCreaturesInRange(myCreature, transform.position, sightDistance);
         for(int i  = 0; i<creaturesInRange.Count; i++){
             if(CanSee(transform.position,creaturesInRange[i].transform.position)){
