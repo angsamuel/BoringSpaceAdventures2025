@@ -229,7 +229,7 @@ public class Blaster : Item
         base.Update();
         Kickback();
         DecaySpread();
-        Aiming();
+        DownSightsUpdate();
     }
 
     public override void Reload(){
