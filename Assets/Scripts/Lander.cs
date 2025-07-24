@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using UnityEngine.TextCore.Text;
 
 public class Lander : MonoBehaviour
 {
@@ -15,9 +16,17 @@ public class Lander : MonoBehaviour
     public float landTime = 2f;
     public Vector3 landingSkyPosition;
     public Vector3 landingGroundPosition;
+
+    [Header("Player Start")]
+    public PlayerInputHandler playerInputHandler;
+    public GameObject player;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        player.GetComponent<Creature>().DisableCreatureMovement();
+
+
 
         StartCoroutine(LandRoutine(landingSkyPosition, landingGroundPosition));
 
@@ -60,9 +69,11 @@ public class Lander : MonoBehaviour
         transform.position = endPosition;
         StartCoroutine(FadeCanopy(opaqueCanopyColor, transparentCanopyColor));
         yield return null;
+        player.GetComponent<Creature>().EnableCreatureMovement();
     }
 
     IEnumerator TakeOffRoutine(Vector3 startPosition, Vector3 endPosition){
+        player.GetComponent<Creature>().DisableCreatureMovement();
         StartCoroutine(FadeCanopy(transparentCanopyColor, opaqueCanopyColor));
         yield return new WaitForSeconds(canopyFadeTime);
         float timer = 0;

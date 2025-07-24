@@ -7,6 +7,8 @@ public class Projectile : MonoBehaviour
     public void SetDamage(int newDamage){
         damage = newDamage;
     }
+
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -19,23 +21,18 @@ public class Projectile : MonoBehaviour
 
     }
 
-    public void OnTriggerEnter(Collider other){
-        //Debug.Log("hit something???");
-
-        if(other.CompareTag("Terrain")){
-            // Debug.Log("hit terrain!");
-            // transform.localScale = new Vector3(2,2,2);
-            // GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Terrain"))
+        {
+            //Instantiate(poof, transform.position, Quaternion.identity);
+            Debug.Log("DESTROY");
             Destroy(gameObject);
-        }else if(other.GetComponent<Creature>() != null){
-            other.GetComponent<Creature>().TakeDamage(damage);
         }
-
-
-
+        else if (collision.gameObject.GetComponent<Creature>() != null)
+        {
+            collision.gameObject.GetComponent<Creature>().TakeDamage(damage);
+            Destroy(gameObject);
+        }
     }
-
-
-
-
 }

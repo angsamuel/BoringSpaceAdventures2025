@@ -5,7 +5,7 @@ public class ClimbingStake : Item
 
     [Header("Climbing Stake Objects")]
     public GameObject zoneVisual;
-    public override void SubUseItem()
+    public override void SubUseItem(Creature c)
     {
         GameObject newStake = Instantiate(this.gameObject,transform.position,Quaternion.identity);
 

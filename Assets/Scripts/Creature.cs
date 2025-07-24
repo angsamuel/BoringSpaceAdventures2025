@@ -14,6 +14,7 @@ public class Creature : MonoBehaviour
     public float oxygenRefillChance = .5f;
     public float maxOxygen = 100f;
     public float oxygen = 100f;
+    public float oxygenDrainRate = .25f;
 
 
     CharacterController cc;
@@ -40,7 +41,7 @@ public class Creature : MonoBehaviour
 
 
 
-
+    public Vector3 moveCache;
 
     void Awake(){
 
@@ -58,7 +59,9 @@ public class Creature : MonoBehaviour
 
     public void SimulateGravity()
     {
-
+        if(!cc.enabled){
+            return;
+        }
         currentGravity.y += gravity * Time.deltaTime;
 
         cc.Move(currentGravity * Time.deltaTime);
@@ -82,20 +85,33 @@ public class Creature : MonoBehaviour
 
     }
 
+
+
     // void FaceTransform(){
     //     bodyTransform.rotation = Quaternion.LookRotation(facingTransform.position - transform.position);
     // }
 
 
+    public void DisableCreatureMovement(){
+        cc.enabled = false;
+
+    }
+    public void EnableCreatureMovement(){
+        cc.enabled = true;
+    }
 
     public void Move(Vector3 direction){
-
+        if (!cc.enabled)
+        {
+            return;
+        }
         direction.y = 0;
 
 
 
         if (direction == Vector3.zero) //fixed
         { //this was the problem
+            moveCache = Vector3.zero;
             return;
         }
 
@@ -104,8 +120,10 @@ public class Creature : MonoBehaviour
         //transform.position = transform.position + direction * speed * Time.deltaTime;
         cc.Move(direction * speed * Time.deltaTime);
 
+        moveCache = direction * speed;
+
         //oxygen drain
-        ConsumeOxygen(speed * Time.deltaTime);
+        ConsumeOxygen(speed * Time.deltaTime * oxygenDrainRate);
 
         // Quaternion lookRotation = Quaternion.LookRotation(direction);
         // bodyTransform.rotation = Quaternion.Lerp(bodyTransform.rotation, lookRotation, Time.deltaTime * rotationSpeed);
@@ -153,6 +171,9 @@ public class Creature : MonoBehaviour
     {
         return health;
     }
+    public int GetMaxHealth(){
+        return maxHealth;
+    }
 
     public float GetOxygen(){
         return oxygen;
@@ -186,7 +207,7 @@ public class Creature : MonoBehaviour
     }
 
     public void AimItem(Quaternion rotation){
-        itemPivot.rotation = rotation;
+        itemPivot.localRotation = rotation;
     }
     public void AimItemToward(Vector3 target){
         AimItem(Quaternion.LookRotation(target - transform.position));
@@ -194,7 +215,7 @@ public class Creature : MonoBehaviour
 
     public void UseItem(){
         if(equippedItem != null){
-            equippedItem.BaseUseItem();
+            equippedItem.BaseUseItem(this);
         }
     }
 
@@ -236,5 +257,22 @@ public class Creature : MonoBehaviour
         return speed * Time.deltaTime;
     }
 
+    public float GetOxygenRatio(){
+        return oxygen / maxOxygen;
+    }
+
+    public void AimDownSights()
+    {
+        Debug.Log("AIM DOWN SIGHTS");
+        equippedItem.AimDownSights();
+    }
+    public void CancelDownSights(){
+        Debug.Log("CANCEL DOWN SIGHTS");
+        equippedItem.CancelDownSights();
+    }
+
+    public Vector3 GetCachedMove(){
+        return moveCache;
+    }
 
 }

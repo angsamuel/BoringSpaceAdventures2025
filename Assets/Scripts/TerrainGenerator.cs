@@ -23,6 +23,9 @@ public class TerrainGenerator : MonoBehaviour
     public float textureIntensity = 1f;
 
 
+    [Header("Rounding")]
+    public float roundingIntensity = 1f;
+    public float roundingIncrease = 0f;
 
 
 
@@ -64,6 +67,9 @@ public class TerrainGenerator : MonoBehaviour
             float noiseValue1 = Mathf.PerlinNoise(x * noiseScale1 + offsetX1, z * noiseScale1 + offsetZ1);
             float noiseValue2 = Mathf.PerlinNoise(x * noiseScale2 + offsetX2, z * noiseScale2 + offsetZ2);
             vertices[i].y += ((noiseValue1*noiseIntensity1) + (noiseValue2*noiseIntensity2)) * maxHeight;
+
+            //rounding
+            vertices[i].y -= Mathf.Max(0,(Vector2.SqrMagnitude(new Vector2(vertices[i].x, vertices[i].z)) + roundingIncrease) * roundingIntensity);
         }
 
 
